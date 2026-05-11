@@ -1477,15 +1477,49 @@ footer{
   emailjs.init("CwxedCNoKlOniiZfD");
 </script>
 </div>
+<!-- ══ FIREBASE (compat SDK) ══ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
 // ══════════════════════════════════════════════
-// DATA STORE (localStorage-backed)
+// 🔥 FIREBASE CONFIG — paste your values here
 // ══════════════════════════════════════════════
+var firebaseConfig = {
+  apiKey:            "AIzaSyAWFzvyTYB1uh0CVrsMuhi1rpF2GHEc-ks",
+  authDomain:        "ipreorders-gh.firebaseapp.com",
+  projectId:         "ipreorders-gh",
+  storageBucket:     "ipreorders-gh.firebasestorage.app",
+  messagingSenderId: "711983030667",
+  appId:             "1:711983030667:web:a48ddb75946070ea1acf8e"
+};
+firebase.initializeApp(firebaseConfig);
+var _db = firebase.firestore();
+
+// ══════════════════════════════════════════════
+// STORE — Firestore-backed, fire-and-forget writes
+// ══════════════════════════════════════════════
+var _cache = {};
 var STORE = {
-  get: function(k, def) {
-    try { var v = localStorage.getItem('iPre-Order GH_'+k); return v ? JSON.parse(v) : def; } catch(e) { return def; }
+  loadAll: function(defaults) {
+    return _db.collection('site').doc('data').get().then(function(snap) {
+      if (snap.exists) {
+        _cache = snap.data();
+      } else {
+        _cache = defaults;
+        _db.collection('site').doc('data').set(defaults);
+      }
+    }).catch(function() { _cache = defaults; });
   },
-  set: function(k, v) { try { localStorage.setItem('iPre-Order GH_'+k, JSON.stringify(v)); } catch(e) {} }
+  get: function(k, def) {
+    return _cache[k] !== undefined ? _cache[k] : def;
+  },
+  set: function(k, v) {
+    _cache[k] = v;
+    _db.collection('site').doc('data').set(_cache).catch(function(e) {
+      console.error('Firestore write error:', e);
+    });
+  }
 };
 
 // ── PHONES DATA ──
@@ -2175,81 +2209,90 @@ function addFaq() {
 }
 
 // ══════════════════════════════════════════════
-// INIT
+// INIT — load from Firestore first, then render
 // ══════════════════════════════════════════════
 window.onload = function() {
+  var defaults = {
+    phones: phones, orders: orders, content: siteContent,
+    testimonials: testimonials, faqs: faqs, momoNums: momoNums,
+    inventory: {}, storageOptions: storageOptions, trustItems: trustItems,
+    imgOverrides: PHONE_IMG_OVERRIDES,
+    notifSettings: { email:'', neworder:true, status:true, stock:false, daily:false, waReply:'' }
+  };
+  // Render immediately with defaults so the page isn't blank while Firebase loads
+  applyImageOverrides();
   renderPhones();
   renderFaqs();
   renderTestimonials();
-  // Apply stored delivery times
-  if (siteContent.airTime && _el('airTime')) _el('airTime').textContent = siteContent.airTime;
-  if (siteContent.shipTime && _el('shipTime')) _el('shipTime').textContent = siteContent.shipTime;
-};
+  renderTrustBar();
 
-// ══════════════════════════════════════════════
-// CROSS-TAB SYNC — reflect admin changes live
-// When the standalone admin dashboard (admin_html.html) saves
-// to localStorage from another tab, re-read and re-render here.
-// ══════════════════════════════════════════════
-window.addEventListener('storage', function(e) {
-  if (!e.key || e.key.indexOf('iPre-Order GH_') !== 0) return;
-  var changed = e.key.replace('iPre-Order GH_', '');
-
-  if (changed === 'phones') {
-    phones = STORE.get('phones', phones);
-    renderPhones();
-  }
-  if (changed === 'testimonials') {
-    testimonials = STORE.get('testimonials', testimonials);
-    renderTestimonials();
-  }
-  if (changed === 'faqs') {
-    faqs = STORE.get('faqs', faqs);
-    renderFaqs();
-  }
-  if (changed === 'trustItems') {
-    trustItems = STORE.get('trustItems', trustItems);
-    renderTrustBar();
-  }
-  if (changed === 'content') {
-    siteContent = STORE.get('content', siteContent);
-    WA = siteContent.whatsapp || WA;
-    // Apply hero/footer/delivery changes
-    var ht = document.querySelector('.hero h1');
-    if (ht && siteContent.heroTitle) {
-      var parts = siteContent.heroTitle.split(',');
-      ht.innerHTML = '<span class="highlight">' + parts[0] + '</span>' +
-        (parts.slice(1).join(',') ? '<br><span class="blue">' + parts.slice(1).join(',') + '</span>' : '');
+  STORE.loadAll(defaults).then(function() {
+    var storedPhones = STORE.get('phones', null);
+    if (storedPhones) {
+      // Merge stored prices into defaultPhones so img/badge fields are always present
+      phones = defaultPhones.map(function(dp) {
+        var stored = storedPhones.find(function(sp) { return sp.id === dp.id; });
+        return stored ? Object.assign({}, dp, { locked: stored.locked, unlocked: stored.unlocked, badge: stored.badge || dp.badge }) : dp;
+      });
+      // Also include any extra phones added via admin that aren't in defaultPhones
+      storedPhones.forEach(function(sp) {
+        if (!phones.find(function(p) { return p.id === sp.id; })) phones.push(sp);
+      });
     }
-    var hs = document.querySelector('.hero p');
-    if (hs && siteContent.heroSub) hs.textContent = siteContent.heroSub;
-    var ey = document.querySelector('.hero-eyebrow');
-    if (ey && siteContent.eyebrow) ey.innerHTML = '<span>●</span> ' + siteContent.eyebrow;
-    var ft = document.querySelector('.footer-copy');
-    if (ft && siteContent.footerCopy) ft.textContent = siteContent.footerCopy;
-    if (siteContent.pageTitle) document.title = siteContent.pageTitle;
-    if (siteContent.airTime && _el('airTime')) _el('airTime').textContent = siteContent.airTime;
-    if (siteContent.shipTime && _el('shipTime')) _el('shipTime').textContent = siteContent.shipTime;
-    // Update all WhatsApp links
-    document.querySelectorAll('a[href*="wa.me"]').forEach(function(a) {
-      a.href = a.href.replace(/wa\.me\/\d+/, 'wa.me/' + WA);
-    });
-  }
-  if (changed === 'imgOverrides') {
+    orders          = STORE.get('orders',         orders);
+    siteContent     = STORE.get('content',        siteContent);
+    testimonials    = STORE.get('testimonials',   testimonials);
+    faqs            = STORE.get('faqs',           faqs);
+    momoNums        = STORE.get('momoNums',       momoNums);
+    storageOptions  = STORE.get('storageOptions', storageOptions);
+    trustItems      = STORE.get('trustItems',     trustItems);
     PHONE_IMG_OVERRIDES = STORE.get('imgOverrides', {});
+    WA = siteContent.whatsapp || WA;
     applyImageOverrides();
     renderPhones();
-  }
-  if (changed === 'storageOptions') {
-    storageOptions = STORE.get('storageOptions', storageOptions);
-  }
-  if (changed === 'momoNums') {
-    momoNums = STORE.get('momoNums', momoNums);
-  }
-  if (changed === 'orders') {
-    orders = STORE.get('orders', orders);
-  }
-});
+    renderFaqs();
+    renderTestimonials();
+    renderTrustBar();
+    applyStoredContent();
+    if (siteContent.airTime && _el('airTime')) _el('airTime').textContent = siteContent.airTime;
+    if (siteContent.shipTime && _el('shipTime')) _el('shipTime').textContent = siteContent.shipTime;
+
+    // ── Real-time sync: reflect admin changes on all devices instantly ──
+    _db.collection('site').doc('data').onSnapshot(function(snap) {
+      if (!snap.exists) return;
+      var fresh = snap.data();
+      if (JSON.stringify(fresh) === JSON.stringify(_cache)) return;
+      _cache = fresh;
+      if (fresh.phones) {
+        // Merge to preserve img/badge fields from defaultPhones
+        phones = defaultPhones.map(function(dp) {
+          var sp = fresh.phones.find(function(p) { return p.id === dp.id; });
+          return sp ? Object.assign({}, dp, { locked: sp.locked, unlocked: sp.unlocked, badge: sp.badge || dp.badge }) : dp;
+        });
+        fresh.phones.forEach(function(sp) {
+          if (!phones.find(function(p) { return p.id === sp.id; })) phones.push(sp);
+        });
+        renderPhones();
+      }
+      if (fresh.testimonials)  { testimonials = fresh.testimonials; renderTestimonials(); }
+      if (fresh.faqs)          { faqs = fresh.faqs; renderFaqs(); }
+      if (fresh.trustItems)    { trustItems = fresh.trustItems; renderTrustBar(); }
+      if (fresh.storageOptions) storageOptions = fresh.storageOptions;
+      if (fresh.momoNums)      momoNums = fresh.momoNums;
+      if (fresh.orders)        orders = fresh.orders;
+      if (fresh.imgOverrides)  { PHONE_IMG_OVERRIDES = fresh.imgOverrides; applyImageOverrides(); renderPhones(); }
+      if (fresh.content) {
+        siteContent = fresh.content;
+        WA = siteContent.whatsapp || WA;
+        applyStoredContent();
+        if (siteContent.airTime && _el('airTime')) _el('airTime').textContent = siteContent.airTime;
+        if (siteContent.shipTime && _el('shipTime')) _el('shipTime').textContent = siteContent.shipTime;
+      }
+    });
+  });
+};
+
+// Real-time sync is now handled inside window.onload via Firestore onSnapshot
 
 // ══════════════════════════════════════════════
 // EXTENDED ADMIN — PHONE IMAGES & STORAGE EDITOR
@@ -2646,7 +2689,7 @@ function importData() {
 
 function resetAllData() {
   if (!confirm('⚠️ This will reset ALL data (prices, orders, content) to defaults. Are you sure?')) return;
-  localStorage.clear();
+  _db.collection('site').doc('data').delete().catch(function(){});
   alert('All data reset. Reloading...');
   location.reload();
 }
@@ -2732,13 +2775,7 @@ function applyStoredContent() {
   }
 }
 
-// Extend window.onload
-var _prevOnLoad2 = window.onload;
-window.onload = function() {
-  if (_prevOnLoad2) _prevOnLoad2();
-  applyStoredContent();
-  renderTrustBar();
-};
+// applyStoredContent + renderTrustBar are now called inside the main window.onload after Firebase loads
 
 </script>
 <script>
