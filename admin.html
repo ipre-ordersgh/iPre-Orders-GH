@@ -833,6 +833,11 @@ tbody tr:hover td { background:rgba(255,255,255,.02); }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<!-- ══ FIREBASE (compat SDK — globals stay accessible to onclick handlers) ══ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
 // ════════════════════════════════════════════════
 //  CONFIG
@@ -841,14 +846,47 @@ var ADMIN_PASSWORD = 'iPre-Order GH 2025';
 var SESSION_KEY    = 'ipreAdminSession';
 
 // ════════════════════════════════════════════════
-//  STORE (shared localStorage with main site)
+//  🔥 FIREBASE — paste your project values here
 // ════════════════════════════════════════════════
+var firebaseConfig = {
+  apiKey:            "AIzaSyAWFzvyTYB1uh0CVrsMuhi1rpF2GHEc-ks",
+  authDomain:        "ipreorders-gh.firebaseapp.com",
+  projectId:         "ipreorders-gh",
+  storageBucket:     "ipreorders-gh.firebasestorage.app",
+  messagingSenderId: "711983030667",
+  appId:             "1:711983030667:web:a48ddb75946070ea1acf8e"
+};
+firebase.initializeApp(firebaseConfig);
+var _db = firebase.firestore();
+
+// ════════════════════════════════════════════════
+//  STORE — Firestore-backed, fire-and-forget writes
+//  One Firestore doc: collection "site", doc "data"
+// ════════════════════════════════════════════════
+var _cache = {};
 var STORE = {
-  KEY: 'iPre-Order GH_',
-  get: function(k, def) {
-    try { var v = localStorage.getItem(this.KEY + k); return v ? JSON.parse(v) : def; } catch(e) { return def; }
+  // Call once at startup (inside an async fn) to fill _cache
+  loadAll: function(defaults) {
+    return _db.collection('site').doc('data').get().then(function(snap) {
+      if (snap.exists) {
+        _cache = snap.data();
+      } else {
+        _cache = defaults;
+        _db.collection('site').doc('data').set(defaults); // seed first run
+      }
+    }).catch(function() { _cache = defaults; });
   },
-  set: function(k, v) { try { localStorage.setItem(this.KEY + k, JSON.stringify(v)); } catch(e) {} }
+  // Sync read from cache
+  get: function(k, def) {
+    return _cache[k] !== undefined ? _cache[k] : def;
+  },
+  // Sync-feeling write: update cache immediately, push to Firestore in background
+  set: function(k, v) {
+    _cache[k] = v;
+    _db.collection('site').doc('data').set(_cache).catch(function(e) {
+      console.error('Firestore write error:', e);
+    });
+  }
 };
 
 // ════════════════════════════════════════════════
@@ -965,20 +1003,30 @@ function loadData() {
 var D = {}; // global data
 
 function initApp() {
-  D = loadData();
-  renderOverview();
-  renderContentPanel();
-  renderNotifPanel();
+  var defaults = {
+    phones: DEFAULT_PHONES, orders: [], content: DEFAULT_CONTENT,
+    testimonials: DEFAULT_TESTIMONIALS, faqs: DEFAULT_FAQS,
+    momoNums: DEFAULT_MOMO, inventory: {}, storageOptions: DEFAULT_STORAGE,
+    trustItems: DEFAULT_TRUST, imgOverrides: {},
+    notifSettings: { email:'', neworder:true, status:true, stock:false, daily:false, waReply:'' }
+  };
+  document.getElementById('topbarTitle').textContent = 'Loading…';
+  STORE.loadAll(defaults).then(function() {
+    D = loadData();
+    renderOverview();
+    renderContentPanel();
+    renderNotifPanel();
 
-  // Responsive two-col
-  var twoCol = document.querySelectorAll('.dash-two-col');
-  function checkLayout() {
-    twoCol.forEach(function(el) {
-      el.style.gridTemplateColumns = window.innerWidth < 640 ? '1fr' : '1fr 1fr';
-    });
-  }
-  checkLayout();
-  window.addEventListener('resize', checkLayout);
+    // Responsive two-col
+    var twoCol = document.querySelectorAll('.dash-two-col');
+    function checkLayout() {
+      twoCol.forEach(function(el) {
+        el.style.gridTemplateColumns = window.innerWidth < 640 ? '1fr' : '1fr 1fr';
+      });
+    }
+    checkLayout();
+    window.addEventListener('resize', checkLayout);
+  }); // end STORE.loadAll
 }
 
 // ════════════════════════════════════════════════
@@ -1795,6 +1843,30 @@ function todayStr() {
 }
 function setVal(id, val) { var el=document.getElementById(id); if(el) el.value=val; }
 function setChecked(id, val) { var el=document.getElementById(id); if(el) el.checked=val; }
+
+// ════════════════════════════════════════════════
+//  REAL-TIME: reflect changes from other devices instantly
+// ════════════════════════════════════════════════
+_db.collection('site').doc('data').onSnapshot(function(snap) {
+  if (!snap.exists || !D.orders) return;
+  var fresh = snap.data();
+  if (JSON.stringify(fresh) === JSON.stringify(_cache)) return;
+  _cache = fresh;
+  D = loadData();
+  renderOverview();
+  var active = document.querySelector('.panel.active');
+  if (active) {
+    var id = active.id.replace('panel','').toLowerCase();
+    if (id === 'orders')    renderOrdersTable();
+    if (id === 'products')  { renderProductsTable(); renderPriceEditor(); }
+    if (id === 'customers') renderCustomersTable();
+    if (id === 'inventory') renderInventoryEditor();
+    if (id === 'sales')     renderSalesPanel();
+    if (id === 'trustbar')  renderTrustEditor();
+    if (id === 'storage')   renderStorageEditor();
+    if (id === 'phoneimages') renderPhoneImagesEditor();
+  }
+});
 </script>
 </body>
 </html>
