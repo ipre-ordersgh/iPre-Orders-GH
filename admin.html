@@ -1264,7 +1264,7 @@ function savePrices() {
   });
   STORE.set('phones', D.phones);
   renderProductsTable();
-  notify('Prices saved!', 'success');
+  notify('Prices saved! Changes reflect live on the main site.', 'success');
 }
 
 // ════════════════════════════════════════════════
@@ -1394,14 +1394,14 @@ function saveContent() {
   D.content.heroSub   = document.getElementById('editHeroSub').value;
   D.content.whatsapp  = document.getElementById('editWA').value;
   STORE.set('content', D.content);
-  notify('Hero content saved! Reload main site to see changes.','success');
+  notify('Hero content saved! Changes reflect live on the main site.','success');
 }
 function saveDelivery() {
   D = loadData();
   D.content.airTime   = document.getElementById('editAirTime').value;
   D.content.shipTime  = document.getElementById('editSeaTime').value;
   STORE.set('content', D.content);
-  notify('Delivery times updated!','success');
+  notify('Delivery times updated! Changes are live on the main site.','success');
 }
 function saveMomoNums() {
   D = loadData();
