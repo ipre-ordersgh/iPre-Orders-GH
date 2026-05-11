@@ -1507,7 +1507,7 @@ var STORE = {
         _cache = snap.data();
       } else {
         _cache = defaults;
-        _db.collection('site').doc('data').set(defaults);
+        _db.collection('site').doc('data').set(defaults, { merge: true });
       }
     }).catch(function() { _cache = defaults; });
   },
@@ -1516,7 +1516,9 @@ var STORE = {
   },
   set: function(k, v) {
     _cache[k] = v;
-    _db.collection('site').doc('data').set(_cache).catch(function(e) {
+    var update = {};
+    update[k] = v;
+    _db.collection('site').doc('data').set(update, { merge: true }).catch(function(e) {
       console.error('Firestore write error:', e);
     });
   }
@@ -1875,6 +1877,8 @@ function submitOrder() {
     status: 'Pending',
     date: new Date().toLocaleDateString('en-GB')
   };
+  // Always read latest orders from cache before adding (avoids overwriting orders from other devices)
+  orders = _cache.orders ? _cache.orders.slice() : orders;
   orders.unshift(newOrder);
   STORE.set('orders', orders);
 
