@@ -872,7 +872,7 @@ var STORE = {
         _cache = snap.data();
       } else {
         _cache = defaults;
-        _db.collection('site').doc('data').set(defaults); // seed first run
+        _db.collection('site').doc('data').set(defaults, { merge: true }); // seed first run
       }
     }).catch(function() { _cache = defaults; });
   },
@@ -883,7 +883,9 @@ var STORE = {
   // Sync-feeling write: update cache immediately, push to Firestore in background
   set: function(k, v) {
     _cache[k] = v;
-    _db.collection('site').doc('data').set(_cache).catch(function(e) {
+    var update = {};
+    update[k] = v;
+    _db.collection('site').doc('data').set(update, { merge: true }).catch(function(e) {
       console.error('Firestore write error:', e);
     });
   }
@@ -1026,6 +1028,13 @@ function initApp() {
     }
     checkLayout();
     window.addEventListener('resize', checkLayout);
+  }).catch(function(err) {
+    console.error('Firebase load error:', err);
+    // Fall back to rendering with defaults so dashboard isn't blank
+    D = loadData();
+    renderOverview();
+    renderContentPanel();
+    renderNotifPanel();
   }); // end STORE.loadAll
 }
 
