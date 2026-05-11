@@ -8,9 +8,6 @@
 <meta name="google-site-verification" content="c-SEAXQcQO8O0TCGKaodg082Bte7XNQ7qUxbFastuHk" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
 /* ═══════════════════════════════════════════
    DESIGN SYSTEM
@@ -2188,6 +2185,71 @@ window.onload = function() {
   if (siteContent.airTime && _el('airTime')) _el('airTime').textContent = siteContent.airTime;
   if (siteContent.shipTime && _el('shipTime')) _el('shipTime').textContent = siteContent.shipTime;
 };
+
+// ══════════════════════════════════════════════
+// CROSS-TAB SYNC — reflect admin changes live
+// When the standalone admin dashboard (admin_html.html) saves
+// to localStorage from another tab, re-read and re-render here.
+// ══════════════════════════════════════════════
+window.addEventListener('storage', function(e) {
+  if (!e.key || e.key.indexOf('iPre-Order GH_') !== 0) return;
+  var changed = e.key.replace('iPre-Order GH_', '');
+
+  if (changed === 'phones') {
+    phones = STORE.get('phones', phones);
+    renderPhones();
+  }
+  if (changed === 'testimonials') {
+    testimonials = STORE.get('testimonials', testimonials);
+    renderTestimonials();
+  }
+  if (changed === 'faqs') {
+    faqs = STORE.get('faqs', faqs);
+    renderFaqs();
+  }
+  if (changed === 'trustItems') {
+    trustItems = STORE.get('trustItems', trustItems);
+    renderTrustBar();
+  }
+  if (changed === 'content') {
+    siteContent = STORE.get('content', siteContent);
+    WA = siteContent.whatsapp || WA;
+    // Apply hero/footer/delivery changes
+    var ht = document.querySelector('.hero h1');
+    if (ht && siteContent.heroTitle) {
+      var parts = siteContent.heroTitle.split(',');
+      ht.innerHTML = '<span class="highlight">' + parts[0] + '</span>' +
+        (parts.slice(1).join(',') ? '<br><span class="blue">' + parts.slice(1).join(',') + '</span>' : '');
+    }
+    var hs = document.querySelector('.hero p');
+    if (hs && siteContent.heroSub) hs.textContent = siteContent.heroSub;
+    var ey = document.querySelector('.hero-eyebrow');
+    if (ey && siteContent.eyebrow) ey.innerHTML = '<span>●</span> ' + siteContent.eyebrow;
+    var ft = document.querySelector('.footer-copy');
+    if (ft && siteContent.footerCopy) ft.textContent = siteContent.footerCopy;
+    if (siteContent.pageTitle) document.title = siteContent.pageTitle;
+    if (siteContent.airTime && _el('airTime')) _el('airTime').textContent = siteContent.airTime;
+    if (siteContent.shipTime && _el('shipTime')) _el('shipTime').textContent = siteContent.shipTime;
+    // Update all WhatsApp links
+    document.querySelectorAll('a[href*="wa.me"]').forEach(function(a) {
+      a.href = a.href.replace(/wa\.me\/\d+/, 'wa.me/' + WA);
+    });
+  }
+  if (changed === 'imgOverrides') {
+    PHONE_IMG_OVERRIDES = STORE.get('imgOverrides', {});
+    applyImageOverrides();
+    renderPhones();
+  }
+  if (changed === 'storageOptions') {
+    storageOptions = STORE.get('storageOptions', storageOptions);
+  }
+  if (changed === 'momoNums') {
+    momoNums = STORE.get('momoNums', momoNums);
+  }
+  if (changed === 'orders') {
+    orders = STORE.get('orders', orders);
+  }
+});
 
 // ══════════════════════════════════════════════
 // EXTENDED ADMIN — PHONE IMAGES & STORAGE EDITOR
