@@ -1857,12 +1857,13 @@ function setChecked(id, val) { var el=document.getElementById(id); if(el) el.che
 //  REAL-TIME: reflect changes from other devices instantly
 // ════════════════════════════════════════════════
 _db.collection('site').doc('data').onSnapshot(function(snap) {
-  if (!snap.exists || !D.orders) return;
+  if (!snap.exists) return;
   var fresh = snap.data();
-  if (JSON.stringify(fresh) === JSON.stringify(_cache)) return;
   _cache = fresh;
   D = loadData();
-  renderOverview();
+  // Re-render even if not yet logged in — data stays updated
+  if (document.getElementById('app') && document.getElementById('app').classList.contains('visible')) {
+    renderOverview();
   var active = document.querySelector('.panel.active');
   if (active) {
     var id = active.id.replace('panel','').toLowerCase();
@@ -1875,6 +1876,7 @@ _db.collection('site').doc('data').onSnapshot(function(snap) {
     if (id === 'storage')   renderStorageEditor();
     if (id === 'phoneimages') renderPhoneImagesEditor();
   }
+  } // end app visible check
 });
 </script>
 </body>
