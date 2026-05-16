@@ -2307,8 +2307,8 @@ window.onload = function() {
 // EXTENDED ADMIN — PHONE IMAGES & STORAGE EDITOR
 // ══════════════════════════════════════════════
 
-// Runtime image overrides (base64 from admin uploads)
-var PHONE_IMG_OVERRIDES = STORE.get('imgOverrides', {});
+// Runtime image overrides — populated after Firestore loads
+var PHONE_IMG_OVERRIDES = {};
 
 // Merge overrides into PHONE_IMGS at runtime
 function applyImageOverrides() {
@@ -2316,7 +2316,6 @@ function applyImageOverrides() {
     PHONE_IMGS[id] = PHONE_IMG_OVERRIDES[id];
   });
 }
-applyImageOverrides();
 
 // Phone storage options (per phone series)
 var defaultStorageOptions = STORE.get('storageOptions', {
