@@ -838,6 +838,7 @@ tbody tr:hover td { background:rgba(255,255,255,.02); }
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+
 <script>
 // ════════════════════════════════════════════════
 //  CONFIG
@@ -1733,6 +1734,12 @@ function renderPhoneImagesEditor() {
         '<input type="file" accept="image/*" id="imgFile_' + p.id + '" ' +
           'onchange="handlePhoneImgUpload(\'' + p.id + '\')" ' +
           'style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.45rem;color:var(--text);font-size:.78rem;cursor:pointer;">' +
+        '<div id="imgProgress_' + p.id + '" style="display:none;margin-top:.5rem;">' +
+          '<div style="background:var(--surface3);border-radius:4px;height:4px;overflow:hidden;">' +
+            '<div id="imgProgressBar_' + p.id + '" style="height:100%;background:var(--accent);width:0%;transition:width .2s;border-radius:4px;"></div>' +
+          '</div>' +
+          '<div id="imgProgressTxt_' + p.id + '" style="font-size:.7rem;color:var(--muted);margin-top:.3rem;">Uploading…</div>' +
+        '</div>' +
         (override
           ? '<button onclick="resetPhoneImg(\'' + p.id + '\')" class="btn btn-red btn-sm" style="margin-top:.5rem;">↩ Reset to default</button>'
           : '<div style="font-size:.72rem;color:var(--muted);margin-top:.4rem;">Using default image</div>') +
@@ -1741,21 +1748,62 @@ function renderPhoneImagesEditor() {
   }).join('');
 }
 
+function compressImage(file, callback) {
+  var MAX_SIZE = 480; // max width or height in px
+  var QUALITY  = 0.82; // JPEG quality (0–1)
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var image = new Image();
+    image.onload = function() {
+      var w = image.width, h = image.height;
+      // Scale down while preserving aspect ratio
+      if (w > MAX_SIZE || h > MAX_SIZE) {
+        if (w > h) { h = Math.round(h * MAX_SIZE / w); w = MAX_SIZE; }
+        else        { w = Math.round(w * MAX_SIZE / h); h = MAX_SIZE; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(image, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', QUALITY));
+    };
+    image.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function handlePhoneImgUpload(phoneId) {
   var input = document.getElementById('imgFile_' + phoneId);
   if (!input || !input.files || !input.files[0]) return;
-  var reader = new FileReader();
-  reader.onload = function(ev) {
+  var file = input.files[0];
+
+  var progressWrap = document.getElementById('imgProgress_' + phoneId);
+  var progressBar  = document.getElementById('imgProgressBar_' + phoneId);
+  var progressTxt  = document.getElementById('imgProgressTxt_' + phoneId);
+  if (progressWrap) progressWrap.style.display = 'block';
+  if (progressBar)  progressBar.style.width = '40%';
+  if (progressTxt)  progressTxt.textContent = 'Compressing…';
+
+  compressImage(file, function(dataUrl) {
+    if (progressBar) progressBar.style.width = '80%';
+    if (progressTxt) progressTxt.textContent = 'Saving…';
+
     D = loadData();
-    D.imgOverrides[phoneId] = ev.target.result;
+    D.imgOverrides[phoneId] = dataUrl;
     STORE.set('imgOverrides', D.imgOverrides);
+
     var prev = document.getElementById('imgPrev_' + phoneId);
-    if (prev) prev.src = ev.target.result;
-    notify('Photo updated for ' + phoneId + '!', 'success');
-    // Re-render to show the reset button
+    if (prev) prev.src = dataUrl;
+
+    if (progressBar) progressBar.style.width = '100%';
+    setTimeout(function() {
+      if (progressWrap) progressWrap.style.display = 'none';
+    }, 400);
+
+    // Show compressed size in KB for reassurance
+    var kb = Math.round((dataUrl.length * 3/4) / 1024);
+    notify('Photo saved! (' + kb + ' KB)', 'success');
     setTimeout(renderPhoneImagesEditor, 300);
-  };
-  reader.readAsDataURL(input.files[0]);
+  });
 }
 
 function resetPhoneImg(phoneId) {
