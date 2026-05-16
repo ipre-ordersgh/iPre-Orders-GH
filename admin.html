@@ -936,14 +936,14 @@ window.addEventListener('DOMContentLoaded', function() {
 //  DATA LOADERS
 // ════════════════════════════════════════════════
 var DEFAULT_PHONES = [
-  { id:'ip16',       name:'iPhone 16',         series:'iPhone 16', locked:9500,  unlocked:11500 },
-  { id:'ip16plus',   name:'iPhone 16 Plus',    series:'iPhone 16', locked:11200, unlocked:13200 },
-  { id:'ip16pro',    name:'iPhone 16 Pro',     series:'iPhone 16', locked:13800, unlocked:16000 },
-  { id:'ip16promax', name:'iPhone 16 Pro Max', series:'iPhone 16', locked:15500, unlocked:18000 },
-  { id:'ip17',       name:'iPhone 17',         series:'iPhone 17', locked:10800, unlocked:13000 },
-  { id:'ip17slim',   name:'iPhone 17 Air',     series:'iPhone 17', locked:12200, unlocked:14500 },
-  { id:'ip17pro',    name:'iPhone 17 Pro',     series:'iPhone 17', locked:15000, unlocked:17500 },
-  { id:'ip17promax', name:'iPhone 17 Pro Max', series:'iPhone 17', locked:17000, unlocked:20000 }
+  { id:'ip16',    name:'iPhone 16',         series:'iPhone 16',     locked:9500,  unlocked:11500 },
+  { id:'ip16p',   name:'iPhone 16 Pro',     series:'iPhone 16 Pro', locked:13800, unlocked:16000 },
+  { id:'ip16pm',  name:'iPhone 16 Pro Max', series:'iPhone 16 Pro', locked:15500, unlocked:18000 },
+  { id:'ip17',    name:'iPhone 17',         series:'iPhone 17',     locked:10800, unlocked:13000 },
+  { id:'ip17air', name:'iPhone 17 Air',     series:'iPhone 17',     locked:12200, unlocked:14500 },
+  { id:'ip17p',   name:'iPhone 17 Pro',     series:'iPhone 17 Pro', locked:15000, unlocked:17500 },
+  { id:'ip17pm',  name:'iPhone 17 Pro Max', series:'iPhone 17 Pro', locked:17000, unlocked:20000 },
+  { id:'ip17e',   name:'iPhone 17e',        series:'iPhone 17',     locked:8000,  unlocked:11000 }
 ];
 var DEFAULT_CONTENT = {
   heroTitle: 'Your Next iPhone, At a Price You\'ll Love.',
@@ -1705,14 +1705,14 @@ function renderMomoEditor() {
 // ════════════════════════════════════════════════
 // Default image URLs from original site (used as fallback preview)
 var PHONE_IMGS_DEFAULT = {
-  ip16:       'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927077',
-  ip16plus:   'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-plus-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927544',
-  ip16pro:    'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926709976',
-  ip16promax: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-max-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926763527',
-  ip17:       'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927077',
-  ip17slim:   'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-plus-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927544',
-  ip17pro:    'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926709976',
-  ip17promax: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-max-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926763527'
+  ip16:    'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927077',
+  ip16p:   'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926709976',
+  ip16pm:  'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-max-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926763527',
+  ip17:    'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927077',
+  ip17air: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-plus-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927544',
+  ip17p:   'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926709976',
+  ip17pm:  'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-pro-max-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1724926763527',
+  ip17e:   'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-16-model-unselect-gallery-1-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1723134927077'
 };
 
 function renderPhoneImagesEditor() {
