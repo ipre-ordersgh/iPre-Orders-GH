@@ -1495,6 +1495,7 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var _db = firebase.firestore();
+var _imgCol = _db.collection('phone-images'); // per-phone image docs
 
 // ══════════════════════════════════════════════
 // STORE — Firestore-backed, fire-and-forget writes
@@ -2256,8 +2257,17 @@ window.onload = function() {
     trustItems      = STORE.get('trustItems',     trustItems);
     PHONE_IMG_OVERRIDES = STORE.get('imgOverrides', {});
     WA = siteContent.whatsapp || WA;
-    applyImageOverrides();
-    renderPhones();
+    // Also fetch per-phone image docs (each phone has its own doc to avoid 1MB limit)
+    _imgCol.get().then(function(snap) {
+      snap.forEach(function(doc) {
+        if (doc.data().img) PHONE_IMG_OVERRIDES[doc.id] = doc.data().img;
+      });
+      applyImageOverrides();
+      renderPhones();
+    }).catch(function() {
+      applyImageOverrides();
+      renderPhones();
+    });
     renderFaqs();
     renderTestimonials();
     renderTrustBar();
@@ -2283,8 +2293,20 @@ window.onload = function() {
         phones = snapshotMerged;
       }
       // Always apply imgOverrides BEFORE rendering phones so override images are never wiped
-      if (fresh.imgOverrides)  { PHONE_IMG_OVERRIDES = fresh.imgOverrides; applyImageOverrides(); }
-      if (fresh.phones || fresh.imgOverrides) renderPhones();
+      if (fresh.imgOverrides) {
+        PHONE_IMG_OVERRIDES = fresh.imgOverrides;
+        // Refresh per-phone image docs too
+        _imgCol.get().then(function(snap) {
+          snap.forEach(function(doc) {
+            if (doc.data().img) PHONE_IMG_OVERRIDES[doc.id] = doc.data().img;
+          });
+          applyImageOverrides();
+          renderPhones();
+        }).catch(function() { applyImageOverrides(); renderPhones(); });
+      } else if (fresh.phones) {
+        applyImageOverrides();
+        renderPhones();
+      }
       if (fresh.testimonials)  { testimonials = fresh.testimonials; renderTestimonials(); }
       if (fresh.faqs)          { faqs = fresh.faqs; renderFaqs(); }
       if (fresh.trustItems)    { trustItems = fresh.trustItems; renderTrustBar(); }
