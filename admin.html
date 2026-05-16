@@ -859,6 +859,7 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var _db = firebase.firestore();
+var _imgCol = _db.collection('phone-images'); // one doc per phone, avoids 1MB Firestore limit
 
 // ════════════════════════════════════════════════
 //  STORE — Firestore-backed, fire-and-forget writes
@@ -1780,36 +1781,45 @@ function handlePhoneImgUpload(phoneId) {
   var progressBar  = document.getElementById('imgProgressBar_' + phoneId);
   var progressTxt  = document.getElementById('imgProgressTxt_' + phoneId);
   if (progressWrap) progressWrap.style.display = 'block';
-  if (progressBar)  progressBar.style.width = '40%';
+  if (progressBar)  progressBar.style.width = '30%';
   if (progressTxt)  progressTxt.textContent = 'Compressing…';
 
   compressImage(file, function(dataUrl) {
-    if (progressBar) progressBar.style.width = '80%';
+    if (progressBar) progressBar.style.width = '70%';
     if (progressTxt) progressTxt.textContent = 'Saving…';
 
-    D = loadData();
-    D.imgOverrides[phoneId] = dataUrl;
-    STORE.set('imgOverrides', D.imgOverrides);
+    // Save to its own doc in phone-images collection (avoids 1MB Firestore doc limit)
+    _imgCol.doc(phoneId).set({ img: dataUrl }).then(function() {
+      if (progressBar) progressBar.style.width = '100%';
 
-    var prev = document.getElementById('imgPrev_' + phoneId);
-    if (prev) prev.src = dataUrl;
+      // Also update the main site doc so onSnapshot picks it up on the storefront
+      D = loadData();
+      D.imgOverrides[phoneId] = dataUrl;
+      _cache.imgOverrides = D.imgOverrides;
+      _db.collection('site').doc('data').set({ imgOverrides: D.imgOverrides }, { merge: true });
 
-    if (progressBar) progressBar.style.width = '100%';
-    setTimeout(function() {
+      var prev = document.getElementById('imgPrev_' + phoneId);
+      if (prev) prev.src = dataUrl;
+
+      setTimeout(function() { if (progressWrap) progressWrap.style.display = 'none'; }, 400);
+      var kb = Math.round((dataUrl.length * 3/4) / 1024);
+      notify('Photo saved! (' + kb + ' KB)', 'success');
+      setTimeout(renderPhoneImagesEditor, 300);
+    }).catch(function(err) {
+      console.error('Firestore image save error:', err);
       if (progressWrap) progressWrap.style.display = 'none';
-    }, 400);
-
-    // Show compressed size in KB for reassurance
-    var kb = Math.round((dataUrl.length * 3/4) / 1024);
-    notify('Photo saved! (' + kb + ' KB)', 'success');
-    setTimeout(renderPhoneImagesEditor, 300);
+      notify('Save failed: ' + err.message, 'error');
+    });
   });
 }
 
 function resetPhoneImg(phoneId) {
   D = loadData();
   delete D.imgOverrides[phoneId];
-  STORE.set('imgOverrides', D.imgOverrides);
+  _cache.imgOverrides = D.imgOverrides;
+  // Remove from dedicated doc and update main doc
+  _imgCol.doc(phoneId).delete();
+  _db.collection('site').doc('data').set({ imgOverrides: D.imgOverrides }, { merge: true });
   var prev = document.getElementById('imgPrev_' + phoneId);
   if (prev) prev.src = PHONE_IMGS_DEFAULT[phoneId] || '';
   notify('Photo reset to default', 'success');
