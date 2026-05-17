@@ -1673,20 +1673,6 @@ function renderPhones() {
     toggle.appendChild(btnU);
     body.appendChild(toggle);
 
-    // Price
-    var priceWrap = document.createElement('div');
-    priceWrap.className = 'price-display';
-    var priceAmt = document.createElement('div');
-    priceAmt.className = 'price-amount';
-    priceAmt.id = 'price_' + p.id;
-    priceAmt.textContent = 'GH₵ ' + p.locked.toLocaleString();
-    var priceLbl = document.createElement('div');
-    priceLbl.className = 'price-label';
-    priceLbl.textContent = 'Sealed · All accessories';
-    priceWrap.appendChild(priceAmt);
-    priceWrap.appendChild(priceLbl);
-    body.appendChild(priceWrap);
-
     // Order button
     var orderBtn = document.createElement('button');
     orderBtn.className = 'btn-order';
@@ -1704,10 +1690,6 @@ function setLock(btn, phoneId) {
   card.querySelectorAll('.lock-opt').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
   var isLocked = btn.getAttribute('data-lock') === 'locked';
-  var p = phones.find(function(x){ return x.id === phoneId; });
-  if (!p) return;
-  var priceEl = _el('price_' + phoneId);
-  if (priceEl) priceEl.textContent = 'GH₵ ' + (isLocked ? p.locked : p.unlocked).toLocaleString();
   card.setAttribute('data-lockstate', btn.getAttribute('data-lock'));
 }
 
