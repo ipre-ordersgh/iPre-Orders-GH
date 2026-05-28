@@ -1072,7 +1072,7 @@ footer{
   <div class="section-head">
     <div class="label">Our Lineup</div>
     <h2 class="title">Choose Your iPhone</h2>
-    <p>Tap Locked or Unlocked to see your price, then hit Pre-Order.</p>
+    <p>Select Locked or Unlocked, then tap <strong>Pre-Order Now</strong> to see storage sizes and pricing.</p>
   </div>
 
   <div class="phone-grid" id="phoneGrid">
@@ -1674,9 +1674,10 @@ function renderPhones() {
     toggle.appendChild(btnU);
     body.appendChild(toggle);
 
-    // Price
+    // Price (hidden on card — only revealed inside checkout overlay)
     var priceWrap = document.createElement('div');
     priceWrap.className = 'price-display';
+    priceWrap.style.display = 'none';
     var priceAmt = document.createElement('div');
     priceAmt.className = 'price-amount';
     priceAmt.id = 'price_' + p.id;
