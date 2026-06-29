@@ -1487,10 +1487,11 @@ function applyStoredContent() {
 
 })();
 
-// ── HERO SLIDESHOW ──
+// ── HERO SLIDESHOW (legacy — hero is now a static image, kept as a no-op guard) ──
 (function() {
   var slides = document.querySelectorAll('.hero-slide');
   var dots = document.querySelectorAll('.slide-dot');
+  if (!slides.length || !dots.length) return;
   var current = 0;
   var total = slides.length;
   var interval;
