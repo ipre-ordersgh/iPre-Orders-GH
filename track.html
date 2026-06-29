@@ -7,7 +7,7 @@
 <meta name="description" content="Pre-order iPhone 16, 16 Pro, 17, 17 Pro Max in Ghana. New in box, all accessories. Sealed. WhatsApp +233206241853">
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,14 +22,27 @@
     <div class="nav-links">
       <a href="phones.html">Phones</a>
       <a href="phones.html#delivery">Delivery</a>
-      <a href="how-to-order.html">How to Order</a>
-      <a href="faq.html">FAQ</a>
-      <a href="track.html">Track Order</a>
     </div>
-    <a href="https://wa.me/233206241853?text=Hi%20iPre-Order%20GH%2C%20 %20 %20 %20 %20 %20 %20Please%20tell%20me%20what%27s%20available!" class="btn btn-wa" style="font-size:.82rem;padding:.5rem 1rem;">
-      💬 WhatsApp
-    </a>
+    <button class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false" aria-controls="navSidebar">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
 
+<!-- MOBILE NAV SIDEBAR -->
+<div class="nav-overlay" id="navOverlay"></div>
+<nav class="nav-sidebar" id="navSidebar" aria-label="Mobile navigation">
+  <div class="nav-sidebar-head">
+    <div class="nav-logo">iPre-Orders GH</div>
+    <button class="nav-sidebar-close" id="navSidebarClose" aria-label="Close menu">✕</button>
+  </div>
+  <div class="nav-sidebar-links">
+    <a href="index.html">Home</a>
+    <a href="phones.html">Phones</a>
+    <a href="phones.html#delivery">Delivery</a>
+    <a href="how-to-order.html">How to Order</a>
+    <a href="faq.html">FAQ</a>
+    <a href="track.html">Track Order</a>
   </div>
 </nav>
 
