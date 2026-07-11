@@ -77,7 +77,7 @@ var phones = STORE.get('phones', defaultPhones);
 var defaultContent = {
   heroTitle: 'Your Next iPhone, At a Price You\'ll Love.',
   heroSub: 'Brand new, sealed in box with all accessories. Locked & Unlocked options. Delivered to your door in Ghana.',
-  whatsapp: '233206241853',
+  whatsapp: '233597363981',
   airTime: '3–4 Weeks',
   shipTime: '45–60 Days'
 };
@@ -116,7 +116,7 @@ var orders = STORE.get('orders', []);
 var _o = { phone:'', phoneId:'', storage:'', price:0, locked:true, network:'', payMethod:'momo', momoNum:'', payStage:'' };
 var SIZES_16 = ['128GB', '256GB','512GB','1TB'];
 var SIZES_17 = ['256GB','512GB','1TB'];
-var WA = '233206241853';
+var WA = '233597363981';
 
 function _el(id){ return document.getElementById(id); }
 function _esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -330,7 +330,7 @@ function selectNet(el, name) {
   el.classList.add('selected');
   _o.network = name;
   var nums = {
-    'MTN MoMo':     { num: '+233 24 687 3140', name: 'Philip Darko' },
+    'MTN MoMo':     { num: '0597363981', name: 'Elliot' },
     'Telecel Cash': { num: '+233 20 624 1853', name: 'Philip Darko' }
   };
   var info = nums[name];
@@ -899,7 +899,7 @@ function renderTrustBar() {
 
 // MoMo numbers
 var defaultMomoNums = STORE.get('momoNums', {
-  'MTN MoMo':     { num: '+233 24 687 3140', name: 'Philip Darko' },
+  'MTN MoMo':     { num: '0597363981', name: 'Elliot' },
   'Telecel Cash': { num: '+233 20 624 1853', name: 'Philip Darko' }
 });
 var momoNums = defaultMomoNums;
@@ -1278,7 +1278,7 @@ renderContentEditor = function() {
     '<div class="editor-group"><label>Hero Title</label><input type="text" id="editHeroTitle" value="' + _esc(siteContent.heroTitle||'') + '"></div>' +
     '<div class="editor-group"><label>Hero Subtitle</label><textarea id="editHeroSub" rows="2">' + _esc(siteContent.heroSub||'') + '</textarea></div>' +
     '<div class="editor-group"><label>WhatsApp Number (digits only, no + or spaces)</label><input type="text" id="editWA" value="' + _esc(siteContent.whatsapp||'') + '"></div>' +
-    '<div class="editor-group"><label>Footer Copyright Text</label><input type="text" id="editFooter" value="' + _esc(siteContent.footerCopy||'© 2025 iPre-Orders GH · All phones are brand new sealed in box · +233 20 624 1853') + '"></div>' +
+    '<div class="editor-group"><label>Footer Copyright Text</label><input type="text" id="editFooter" value="' + _esc(siteContent.footerCopy||'© 2025 iPre-Orders GH · All phones are brand new sealed in box · +233 59 736 3981') + '"></div>' +
     '<div class="editor-group"><label>Eye-brow Pill Text (top of hero)</label><input type="text" id="editEyebrow" value="' + _esc(siteContent.eyebrow||'Now accepting pre-orders · iPhone 16 & 17 series') + '"></div>' +
     '<div class="editor-group"><label>Site Page Title (browser tab)</label><input type="text" id="editPageTitle" value="' + _esc(siteContent.pageTitle||document.title) + '"></div>';
 };
