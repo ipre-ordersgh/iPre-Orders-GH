@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPre-Orders GH · Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="loginScreen">
+  <div class="login-card" id="loginCard">
+    <div class="login-logo">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+      </svg>
+      iPre-Orders GH
+    </div>
+    <div class="login-title">Admin Dashboard</div>
+    <div class="login-sub">Secure access · Enter your password to continue</div>
+
+    <div class="login-field">
+      <label>Admin Password</label>
+      <input type="password" class="login-input" id="pwdInput"
+        placeholder="••••••••••••••••"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-err" id="loginErr">Incorrect password. Please try again.</div>
+    <button class="login-btn" onclick="doLogin()">Unlock Dashboard →</button>
+    <div class="login-hint">🔒 Access restricted to authorised personnel</div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+      </svg>
+      Admin Panel
+    </div>
+
+    <div class="sidebar-section">Main</div>
+    <button class="nav-item active" onclick="showPanel('overview',this)">📊 Overview</button>
+    <button class="nav-item" onclick="showPanel('orders',this)">📦 Orders</button>
+    <button class="nav-item" onclick="showPanel('products',this)">📱 Products</button>
+    <button class="nav-item" onclick="showPanel('customers',this)">👥 Customers</button>
+    <button class="nav-item" onclick="showPanel('inventory',this)">🗄️ Inventory</button>
+
+    <div class="sidebar-section">Manage</div>
+    <button class="nav-item" onclick="showPanel('sales',this)">💰 Sales & Revenue</button>
+    <button class="nav-item" onclick="showPanel('phoneimages',this)">📸 Phone Photos</button>
+    <button class="nav-item" onclick="showPanel('storage',this)">💾 Storage Options</button>
+    <button class="nav-item" onclick="showPanel('trustbar',this)">✅ Trust Bar</button>
+    <button class="nav-item" onclick="showPanel('content',this)">✏️ Site Content</button>
+    <button class="nav-item" onclick="showPanel('notifications',this)">🔔 Notifications</button>
+
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-bottom">
+      <button class="nav-item" onclick="exportData()">⬇ Export Data</button>
+      <button class="nav-item" onclick="importData()">⬆ Import Data</button>
+      <button class="nav-item danger" onclick="doLogout()">✕ Logout</button>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div class="topbar-title" id="topbarTitle">Overview</div>
+        <div class="topbar-badge" id="topbarBadge">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap" id="searchWrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search orders…" id="globalSearch" oninput="handleSearch(this.value)">
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="window.open('index.html','_blank')">↗ View Site</button>
+      </div>
+    </div>
+
+    <!-- ══════════ PANELS ══════════ -->
+
+    <!-- ── OVERVIEW ── -->
+    <div class="panel active" id="panelOverview">
+      <div class="stats-grid" id="overviewStats"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;" class="dash-two-col">
+        <!-- Revenue bar chart -->
+        <div class="editor-card" style="margin-bottom:0;">
+          <div class="section-hd" style="margin-bottom:1rem;">
+            <h3>Revenue by Phone</h3>
+            <span style="font-size:.72rem;color:var(--muted);">Top sellers</span>
+          </div>
+          <div class="chart-bar-wrap" id="revenueChart"></div>
+        </div>
+        <!-- Order status donut -->
+        <div class="editor-card" style="margin-bottom:0;">
+          <div class="section-hd" style="margin-bottom:1rem;">
+            <h3>Order Status</h3>
+          </div>
+          <div class="ring-wrap" id="statusRings"></div>
+        </div>
+      </div>
+
+      <div class="section-hd">
+        <h3>Recent Orders</h3>
+        <button class="btn btn-outline btn-sm" onclick="showPanel('orders',null)">View all →</button>
+      </div>
+      <div class="tbl-wrap"><table id="recentOrdersTable"></table></div>
+    </div>
+
+    <!-- ── ORDERS ── -->
+    <div class="panel" id="panelOrders">
+      <div class="section-hd">
+        <h3 class="panel-title" style="margin-bottom:0;">All Orders</h3>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+          <select class="a-select btn-sm" id="orderFilter" onchange="renderOrdersTable()">
+            <option value="">All Statuses</option>
+            <option>Pending</option><option>Confirmed</option>
+            <option>Processing</option><option>Shipped</option><option>Delivered</option>
+          </select>
+          <button class="btn btn-blue btn-sm" onclick="openAddOrderModal()">+ Add Order</button>
+        </div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:1rem;"><table id="allOrdersTable"></table></div>
+    </div>
+
+    <!-- ── PRODUCTS ── -->
+    <div class="panel" id="panelProducts">
+      <div class="section-hd">
+        <h3 class="panel-title" style="margin-bottom:0;">Products</h3>
+        <button class="btn btn-blue btn-sm" onclick="openAddProductModal()">+ Add Product</button>
+      </div>
+      <div class="tbl-wrap" style="margin-top:1rem;"><table id="productsTable"></table></div>
+
+      <div style="margin-top:2rem;">
+        <div class="section-hd"><h3>Prices</h3><button class="btn btn-blue btn-sm" onclick="savePrices()">Save Prices</button></div>
+        <div id="priceEditor" style="margin-top:.8rem;"></div>
+      </div>
+    </div>
+
+    <!-- ── CUSTOMERS ── -->
+    <div class="panel" id="panelCustomers">
+      <div class="section-hd">
+        <h3 class="panel-title" style="margin-bottom:0;">Customers</h3>
+        <span id="custCount" style="font-size:.8rem;color:var(--muted);"></span>
+      </div>
+      <div class="tbl-wrap" style="margin-top:1rem;"><table id="customersTable"></table></div>
+    </div>
+
+    <!-- ── INVENTORY ── -->
+    <div class="panel" id="panelInventory">
+      <div class="section-hd">
+        <h3 class="panel-title" style="margin-bottom:0;">Inventory & Stock</h3>
+        <button class="btn btn-blue btn-sm" onclick="saveInventory()">Save Changes</button>
+      </div>
+      <div id="inventoryEditor" style="margin-top:1rem;"></div>
+    </div>
+
+    <!-- ── SALES ── -->
+    <div class="panel" id="panelSales">
+      <div class="panel-title">Sales & Revenue</div>
+      <div class="stats-grid" id="salesStats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;" class="dash-two-col">
+        <div class="editor-card" style="margin-bottom:0;">
+          <div class="section-hd"><h3>Revenue by Model</h3></div>
+          <div class="chart-bar-wrap" id="salesChart"></div>
+        </div>
+        <div class="editor-card" style="margin-bottom:0;">
+          <div class="section-hd"><h3>Payment Method Split</h3></div>
+          <div id="payMethodChart" class="chart-bar-wrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONTENT ── -->
+    <div class="panel" id="panelContent">
+      <div class="panel-title">Site Content</div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>Hero Section</h3><button class="btn btn-blue btn-sm" onclick="saveContent()">Save</button></div>
+        <div style="margin-top:.8rem;">
+          <label class="field-label">Hero Title</label>
+          <input type="text" class="a-input" id="editHeroTitle" style="margin-bottom:.8rem;">
+          <label class="field-label">Hero Subtitle</label>
+          <textarea class="a-textarea" id="editHeroSub" rows="2"></textarea>
+          <label class="field-label" style="margin-top:.8rem;display:block;">WhatsApp Number</label>
+          <input type="text" class="a-input" id="editWA">
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>Delivery Times</h3><button class="btn btn-blue btn-sm" onclick="saveDelivery()">Save</button></div>
+        <div class="field-row" style="margin-top:.8rem;">
+          <div>
+            <label class="field-label">Air Freight</label>
+            <input type="text" class="a-input" id="editAirTime">
+          </div>
+          <div>
+            <label class="field-label">Sea Freight</label>
+            <input type="text" class="a-input" id="editSeaTime">
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>MoMo Numbers</h3><button class="btn btn-blue btn-sm" onclick="saveMomoNums()">Save</button></div>
+        <div id="momoEditor" style="margin-top:.8rem;"></div>
+      </div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>Testimonials</h3><button class="btn btn-blue btn-sm" onclick="addTestimonial()">+ Add</button></div>
+        <div id="testimonialEditor" style="margin-top:.8rem;"></div>
+      </div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>FAQs</h3><button class="btn btn-blue btn-sm" onclick="addFaq()">+ Add</button></div>
+        <div id="faqEditor" style="margin-top:.8rem;"></div>
+      </div>
+    </div>
+
+    <!-- ── NOTIFICATIONS ── -->
+    <div class="panel" id="panelNotifications">
+      <div class="panel-title">Email & Notification Settings</div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>Admin Notification Email</h3></div>
+        <div style="margin-top:.8rem;">
+          <label class="field-label">Send order alerts to</label>
+          <div style="display:flex;gap:.7rem;flex-wrap:wrap;">
+            <input type="email" class="a-input" id="adminEmail" placeholder="admin@ipreordersgh.com" style="max-width:300px;">
+            <button class="btn btn-blue btn-sm" onclick="saveNotifSettings()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>Notification Triggers</h3></div>
+        <div style="margin-top:.4rem;">
+          <div class="notif-row">
+            <div class="notif-info">
+              <h4>New Order Placed</h4>
+              <p>Send alert when a customer places a pre-order</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="notif_neworder" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-knob"></div>
+            </label>
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <h4>Order Status Changed</h4>
+              <p>Notify admin when order status updates</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="notif_status" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-knob"></div>
+            </label>
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <h4>Low Stock Alert</h4>
+              <p>Alert when a product stock drops below threshold</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="notif_stock">
+              <div class="toggle-track"></div>
+              <div class="toggle-knob"></div>
+            </label>
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <h4>Daily Sales Summary</h4>
+              <p>Email daily revenue digest at 9am</p>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="notif_daily">
+              <div class="toggle-track"></div>
+              <div class="toggle-knob"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-card">
+        <div class="section-hd"><h3>WhatsApp Auto-Reply</h3></div>
+        <div style="margin-top:.8rem;">
+          <label class="field-label">Message sent to customers after order</label>
+          <textarea class="a-textarea" id="waAutoReply" rows="4" placeholder="Hi {name}! Your pre-order for {phone} has been confirmed. Order ID: {orderId}. We'll keep you updated. — iPre-Orders GH"></textarea>
+          <button class="btn btn-blue btn-sm" style="margin-top:.7rem;" onclick="saveWAReply()">Save Reply Template</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PHONE IMAGES ── -->
+    <div class="panel" id="panelPhoneimages">
+      <div class="section-hd">
+        <h3 class="panel-title" style="margin-bottom:0;">📸 Phone Photos</h3>
+        <span style="font-size:.78rem;color:var(--muted);">Upload to override — saved in browser storage</span>
+      </div>
+      <div id="phoneImagesEditor" style="margin-top:1rem;display:flex;flex-direction:column;gap:.8rem;"></div>
+    </div>
+
+    <!-- ── STORAGE OPTIONS ── -->
+    <div class="panel" id="panelStorage">
+      <div class="section-hd">
+        <h3 class="panel-title" style="margin-bottom:0;">💾 Storage Options</h3>
+        <button class="btn btn-blue btn-sm" onclick="saveStorageOptions()">Save Changes</button>
+      </div>
+      <p style="font-size:.8rem;color:var(--muted);margin:.6rem 0 1.2rem;">These control the storage sizes shown in the checkout picker for each phone series.</p>
+      <div id="storageOptionsEditor" style="display:flex;flex-direction:column;gap:.8rem;"></div>
+    </div>
+
+    <!-- ── TRUST BAR ── -->
+    <div class="panel" id="panelTrustbar">
+      <div class="section-hd">
+        <h3 class="panel-title" style="margin-bottom:0;">✅ Trust Bar Items</h3>
+        <div style="display:flex;gap:.6rem;">
+          <button class="btn btn-outline btn-sm" onclick="addTrustItem()">+ Add Item</button>
+          <button class="btn btn-blue btn-sm" onclick="saveTrustBar()">Save Changes</button>
+        </div>
+      </div>
+      <p style="font-size:.8rem;color:var(--muted);margin:.6rem 0 1.2rem;">These are the scrolling trust badges shown on the main site.</p>
+      <div id="trustBarEditor" style="display:flex;flex-direction:column;gap:.5rem;margin-top:.4rem;"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══ ADD ORDER MODAL ═══ -->
+<div class="modal-bg" id="addOrderModal">
+  <div class="modal">
+    <h3>Add Manual Order</h3>
+    <div style="display:flex;flex-direction:column;gap:.8rem;">
+      <div>
+        <label class="field-label">Customer Name *</label>
+        <input type="text" class="a-input" id="mo_name" placeholder="e.g. Ama Asante">
+      </div>
+      <div>
+        <label class="field-label">WhatsApp / Phone *</label>
+        <input type="text" class="a-input" id="mo_phone" placeholder="+233 xx xxx xxxx">
+      </div>
+      <div>
+        <label class="field-label">Email</label>
+        <input type="email" class="a-input" id="mo_email" placeholder="optional">
+      </div>
+      <div>
+        <label class="field-label">Phone Model *</label>
+        <input type="text" class="a-input" id="mo_model" placeholder="e.g. iPhone 17 Pro Max">
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="field-label">Storage</label>
+          <input type="text" class="a-input" id="mo_storage" placeholder="256GB">
+        </div>
+        <div>
+          <label class="field-label">Price (GH₵)</label>
+          <input type="number" class="a-input" id="mo_price" placeholder="0">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="field-label">Status</label>
+          <select class="a-select a-input" id="mo_status">
+            <option>Pending</option><option>Confirmed</option>
+            <option>Processing</option><option>Shipped</option><option>Delivered</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Payment Stage</label>
+          <select class="a-select a-input" id="mo_paidStage">
+            <option>60% Deposit</option><option>40% Balance</option><option>Fully Paid</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Delivery Address</label>
+        <input type="text" class="a-input" id="mo_addr" placeholder="Street, Area, City">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addOrderModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="saveManualOrder()">Add Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADD PRODUCT MODAL ═══ -->
+<div class="modal-bg" id="addProductModal">
+  <div class="modal">
+    <h3>Add New Product</h3>
+    <div style="display:flex;flex-direction:column;gap:.8rem;">
+      <div>
+        <label class="field-label">Product Name *</label>
+        <input type="text" class="a-input" id="np_name" placeholder="e.g. iPhone 17 Pro Max">
+      </div>
+      <div>
+        <label class="field-label">Series / Category</label>
+        <input type="text" class="a-input" id="np_series" placeholder="e.g. iPhone 17">
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="field-label">Locked Price (GH₵)</label>
+          <input type="number" class="a-input" id="np_locked" placeholder="0">
+        </div>
+        <div>
+          <label class="field-label">Unlocked Price (GH₵)</label>
+          <input type="number" class="a-input" id="np_unlocked" placeholder="0">
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Stock Quantity</label>
+        <input type="number" class="a-input" id="np_stock" placeholder="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addProductModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="saveNewProduct()">Add Product</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<!-- ══ FIREBASE (compat SDK — globals stay accessible to onclick handlers) ══ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+
+<script src="admin.js"></script>
+</body>
+</html>
